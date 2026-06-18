@@ -1,0 +1,59 @@
+DeepVol_Project/
+│
+├── data/                           # Ignored in version control (.gitignore)
+│   ├── raw/                        # Raw 5-min ETH/USDT bars (pre-2026 and 2026 holdout)
+│   └── processed/                  # Cleaned, grid-filled datasets with quantitative features
+│
+├── notebooks/                      # Jupyter notebooks for EDA and model training
+│   ├── 01_data_exploration.ipynb   # Divyam: DVOL, multi-asset correlation checks
+│   ├── 02_feature_engineering.ipynb# Testing Wavelet transforms, Amihud, Z-scores
+│   ├── 03_train_volatility.ipynb   # Person 2: Multivariate LSTM training & QLIKE loss
+│   ├── 04_train_regime.ipynb       # Person 3: Gaussian HMM clustering + LSTM mapping
+│   └── 05_backtest_eval.ipynb      # Ayush: Walk-forward analysis, Sharpe, Drawdown
+│
+├── src/                            # Core Python source code
+│   ├── __init__.py
+│   │
+│   ├── data_pipeline/              # Divyam's Domain
+│   │   ├── fetch_binance.py        # REST API puller for historical data (Done)
+│   │   └── preprocessor.py         # Grid-filling, scaling, and DWT (Wavelet) logic
+│   │
+│   ├── features/                   # Feature calculation modules
+│   │   ├── technicals.py           # HAR lags, RSI, EMA, Garman-Klass, Sin/Cos time
+│   │   └── microstructure.py       # Amihud Illiquidity, Volume Imbalance, Whale tracker
+│   │
+│   ├── models/                     # Person 2 & Person 3's Domain
+│   │   ├── baseline_garch.py       # Baseline statistical models to beat
+│   │   ├── vol_lstm.py             # PyTorch class for the Volatility LSTM
+│   │   ├── regime_hmm_lstm.py      # PyTorch class + `hmmlearn` logic for Regime Detection
+│   │   └── inference.py            # Script that loads `.pt`/`.pth` weights for live prediction
+│   │
+│   └── strategy/                   # Ayush's Domain
+│       ├── vwap_mean_reversion.py  # The core execute(current_price, capital) function
+│       ├── position_sizing.py      # Fractional Kelly criterion logic based on volatility
+│       └── metrics.py              # Calculators for Sharpe, MDD, Band Coverage
+│
+├── cpp_engine/                     # The High-Speed C++ Hub (TimeSeries Framework)
+│   ├── src/
+│   │   ├── main.cpp                # Initializes the hub and WebSocket connections
+│   │   ├── queue_manager.cpp       # Zero-MQ or fast queue broadcasting data to Python
+│   │   └── logger.cpp              # High-speed asynchronous trade logging
+│   ├── include/                    # C++ Header files
+│   └── CMakeLists.txt              # Build configuration for the C++ engine
+│
+├── weights/                        # Saved model weights (Ignored in .gitignore)
+│   ├── vol_lstm_best.pth           
+│   ├── regime_hmm_best.pkl
+│   └── regime_lstm_best.pth
+│
+├── config/                         # Configuration files
+│   ├── config.yaml                 # Hyperparameters (78 bar window, thresholds)
+│   └── tickers.json                # List of assets (ETH-USDT, BTC-USDT)
+│
+├── logs/                           # Trade logs and system errors
+│   ├── backtest_results.csv        
+│   └── system_errors.log           
+│
+├── requirements.txt                # Python dependencies (torch, hmmlearn, pandas, pywt, etc.)
+├── README.md                       # Setup instructions for the team
+└── .gitignore                      # Ignore large data files, weights, and __pycache__

@@ -1,0 +1,4 @@
+requests
+pandas
+PyWavelets
+scikit-learn
