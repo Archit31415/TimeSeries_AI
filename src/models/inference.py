@@ -36,6 +36,38 @@ class DeepVolInferenceEngine:
         self.vol_model.eval()
         self.regime_model.eval()
         
+        # 4. Auto-map HMM states to indices by loading HMM pickle from the same directory if it exists
+        self.state_mapping = {
+            "State_0_Downtrend": 0,
+            "State_1_Uptrend": 2,
+            "State_2_Chop": 1
+        }  # Default fallback mapping
+        
+        try:
+            hmm_path = Path(regime_weights_path).parent / "regime_hmm_best.pkl"
+            if hmm_path.exists():
+                import pickle
+                with open(hmm_path, "rb") as f:
+                    hmm_model = pickle.load(f)
+                if hasattr(hmm_model, "means_"):
+                    means = hmm_model.means_
+                    # HMM was fit on ['log_return', 'rv_1h'], so column 0 is log_return.
+                    # Downtrend is the lowest mean return, Uptrend is the highest mean return.
+                    downtrend_idx = int(np.argmin(means[:, 0]))
+                    uptrend_idx = int(np.argmax(means[:, 0]))
+                    chop_idx = int(3 - downtrend_idx - uptrend_idx)
+                    
+                    self.state_mapping = {
+                        "State_0_Downtrend": downtrend_idx,
+                        "State_1_Uptrend": uptrend_idx,
+                        "State_2_Chop": chop_idx
+                    }
+                    logging.info(f"Automatically mapped HMM states from pickle: {self.state_mapping}")
+            else:
+                logging.warning(f"Could not find HMM pickle at {hmm_path}. Using default state mapping.")
+        except Exception as e:
+            logging.warning(f"Error auto-mapping HMM states from pickle: {e}. Using default state mapping.")
+        
         logging.info("Inference Engine ready. Models locked in eval mode.")
 
     def _load_weights(self, model: torch.nn.Module, filepath: str, model_name: str):
@@ -85,9 +117,9 @@ class DeepVolInferenceEngine:
         return {
             "predicted_volatility": predicted_vol,
             "regime_probabilities": {
-                "State_0_Downtrend": regime_probs[0],
-                "State_1_Uptrend": regime_probs[2],
-                "State_2_Chop": regime_probs[1]
+                "State_0_Downtrend": regime_probs[self.state_mapping["State_0_Downtrend"]],
+                "State_1_Uptrend": regime_probs[self.state_mapping["State_1_Uptrend"]],
+                "State_2_Chop": regime_probs[self.state_mapping["State_2_Chop"]]
             }
         }
 
