@@ -72,7 +72,7 @@ class VWAPMeanReversionStrategy:
             
             # --- EXIT LOGIC ---
             # If we are holding a long position and price has reverted back to the VWAP, secure profits.
-            if current_holdings > 0 and current_price >= vwap:
+            if current_holdings > 0 and current_price > upper_band:
                 logging.info(f"Price reverted to VWAP ({current_price:.2f} >= {vwap:.2f}). Securing profits.")
                 orders["sell"] = current_holdings
                 return orders

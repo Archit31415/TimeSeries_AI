@@ -86,8 +86,8 @@ class DeepVolInferenceEngine:
             "predicted_volatility": predicted_vol,
             "regime_probabilities": {
                 "State_0_Downtrend": regime_probs[0],
-                "State_1_Uptrend": regime_probs[1],
-                "State_2_Chop": regime_probs[2]
+                "State_1_Uptrend": regime_probs[2],
+                "State_2_Chop": regime_probs[1]
             }
         }
 

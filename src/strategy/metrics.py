@@ -65,9 +65,11 @@ class BacktestMetrics:
         Checks what percentage of actual future returns landed inside the predicted dynamic bands.
         For a z_score of 1.96 (assuming normal distribution), target coverage is ~95%.
         """
+        pred_5min_vol = predicted_vols / np.sqrt(288)
+        
         # Upper and lower bounds predicted by the model
-        upper_band = predicted_vols * z_score
-        lower_band = -predicted_vols * z_score
+        upper_band = pred_5min_vol * z_score
+        lower_band = -pred_5min_vol * z_score
         
         # Boolean mask of whether the return stayed inside the bands
         inside_bands = (actual_returns >= lower_band) & (actual_returns <= upper_band)
