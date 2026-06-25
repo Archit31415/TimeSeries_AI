@@ -63,36 +63,26 @@ class MarketDataPreprocessor:
         return df
 
     def rolling_wavelet_denoise(self, series: pd.Series, window: int = 78, wavelet: str = 'db4') -> pd.Series:
-        """
-        Applies Discrete Wavelet Transform (DWT) to denoise a signal.
-        CRITICAL: Standard DWT uses the whole array (future data) to smooth the past. 
-        To prevent lookahead bias, we MUST apply this on a rolling window, 
-        only looking at the last `window` bars (78 bars = 1 trading day roughly).
-        """
-        logging.info(f"Applying rolling DWT denoising (window={window}, wavelet={wavelet}). This may take a moment...")
+        logging.info(f"Applying rolling DWT denoising (window={window}, wavelet={wavelet}).")
         
         denoised_signal = np.full(len(series), np.nan)
         values = series.values
         
         for i in range(window, len(values)):
-            # Extract strictly historical window
-            current_window = values[i-window:i]
+            # --- FIX: .copy() forces the slice into a writable, 
+            # standard-memory NumPy array ---
+            current_window = values[i-window:i].copy() 
             
             # Decompose signal
             coeffs = pywt.wavedec(current_window, wavelet, level=2)
             
-            # Thresholding: Zero out the high-frequency detail coefficients (noise)
-            # coeffs[0] is the approximation (trend), the rest are details (noise)
-            sigma = np.median(np.abs(coeffs[-1])) / 0.6745  # Robust MAD estimator
+            # Thresholding logic...
+            sigma = np.median(np.abs(coeffs[-1])) / 0.6745
             uthresh = sigma * np.sqrt(2 * np.log(len(current_window)))
             
-            # Apply soft thresholding to detail coefficients
             coeffs[1:] = [pywt.threshold(c, value=uthresh, mode='soft') for c in coeffs[1:]]
             
-            # Reconstruct the signal
             reconstructed = pywt.waverec(coeffs, wavelet)
-            
-            # Take ONLY the final point of the reconstructed window (t) to prevent leakage
             denoised_signal[i] = reconstructed[-1]
             
         return pd.Series(denoised_signal, index=series.index)

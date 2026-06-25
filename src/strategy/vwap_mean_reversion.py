@@ -36,9 +36,16 @@ class VWAPMeanReversionStrategy:
         Returns:
             dict: Expected by the C++ engine in the format {"buy": X, "sell": Y}
         """
-        # 1. Define the dynamic volatility bands
-        upper_band = vwap + (self.z_score_threshold * predicted_vol * current_price)
-        lower_band = vwap - (self.z_score_threshold * predicted_vol * current_price)
+
+        # UPDATE IN VWAP_MEAN_REVERSION.PY
+
+        # 1. Translate Daily Volatility down to a 5-Minute Volatility frame
+        # (Divide by the square root of 288 bars)
+        pred_5min_vol = predicted_vol / math.sqrt(288)
+
+        # 2. Define the dynamic volatility bands using the 5-min volatility
+        upper_band = vwap + (self.z_score_threshold * pred_5min_vol * current_price)
+        lower_band = vwap - (self.z_score_threshold * pred_5min_vol * current_price)
         
         # 2. Extract Regime Confidences
         prob_chop = regime_probs.get("State_2_Chop", 0.0)

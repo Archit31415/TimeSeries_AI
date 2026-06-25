@@ -78,18 +78,26 @@ class BacktestMetrics:
     def generate_trade_summary(self, trades: pd.DataFrame) -> dict:
         """
         Calculates execution-specific metrics (Win Rate, Profit Factor, Fees Paid).
-        Expects a DataFrame with columns: ['entry_time', 'exit_time', 'pnl', 'volume_traded']
         """
+        # Define the default structure for when no trades occur
+        default_stats = {
+            "total_trades": 0,
+            "win_rate_pct": 0.0,
+            "profit_factor": 0.0,
+            "net_profit": 0.0,
+            "total_fees_paid": 0.0
+        }
+        
         if trades.empty:
-            return {"total_trades": 0, "win_rate": 0.0, "profit_factor": 0.0, "total_fees": 0.0}
+            return default_stats
             
-        # Deduct fees from PnL (Approximation: Volume * fee_rate * 2 for round trip)
+        # Deduct fees from PnL
         trades['net_pnl'] = trades['pnl'] - (trades['volume_traded'] * self.fee_rate * 2)
         
         winning_trades = trades[trades['net_pnl'] > 0]
         losing_trades = trades[trades['net_pnl'] <= 0]
         
-        win_rate = len(winning_trades) / len(trades) * 100.0
+        win_rate = (len(winning_trades) / len(trades)) * 100.0
         
         gross_profit = winning_trades['net_pnl'].sum()
         gross_loss = abs(losing_trades['net_pnl'].sum())

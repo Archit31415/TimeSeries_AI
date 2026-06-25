@@ -1,2 +1,7 @@
 .venv
 structure.txt
+
+data
+*__pycache__
+
+weights

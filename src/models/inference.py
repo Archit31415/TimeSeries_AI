@@ -4,8 +4,8 @@ import logging
 from pathlib import Path
 
 # Import the model architectures
-from vol_lstm import VolatilityLSTM
-from regime_hmm_lstm import RegimeLSTM
+from models.vol_lstm import VolatilityLSTM
+from models.regime_hmm_lstm import RegimeLSTM
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

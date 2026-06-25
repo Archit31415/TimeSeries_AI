@@ -106,23 +106,23 @@ if __name__ == "__main__":
     
     # --- PHASE 1: Training & Validation Set (Pre-2026) ---
     # Used for fitting scalers, HMM regimes, and training LSTMs
-    download_historical_data(
-        symbol="ETHUSDT",
-        start_date="2024-01-01",
-        end_date="2026-01-01",
-        interval="5m",
-        save_dir=str(target_dir)
-    )
+    # download_historical_data(
+    #     symbol="ETHUSDT",
+    #     start_date="2024-01-01",
+    #     end_date="2026-01-01",
+    #     interval="5m",
+    #     save_dir=str(target_dir)
+    # )
     
     # --- PHASE 2: Strict OOS Test Set (2026) ---
     # Locked away until the final backtest in Guwahati
-    download_historical_data(
-        symbol="ETHUSDT",
-        start_date="2026-01-01",
-        end_date="2026-06-01",
-        interval="5m",
-        save_dir=str(target_dir)
-    )
+    # download_historical_data(
+    #     symbol="ETHUSDT",
+    #     start_date="2026-01-01",
+    #     end_date="2026-06-01",
+    #     interval="5m",
+    #     save_dir=str(target_dir)
+    # )
     
-    # Optional: Fetch BTC for multi-asset correlation (if Divyam needs it for Idea 1)
-    # download_historical_data("BTCUSDT", "2024-06-01", "2025-12-31", "5m", str(target_dir))
+    # Optional: Fetch BTC for multi-asset correlation
+    download_historical_data("BTCUSDT", "2024-06-01", "2026-01-01", "5m", str(target_dir))
