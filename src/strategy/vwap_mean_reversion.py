@@ -94,7 +94,7 @@ class VWAPMeanReversionStrategy:
                 if current_price >= vwap:
                     logging.info(f"MR Exit: Price {current_price:.2f} >= VWAP {vwap:.2f}. Selling to close long.")
                     orders["sell"] = current_holdings
-                    orders["exec_price"] = vwap
+                    orders["exec_price"] = current_price
                     orders["is_maker"] = True
             
             # Exit short position: if we are holding a short position, flatten it at current price (market/taker)
@@ -117,7 +117,7 @@ class VWAPMeanReversionStrategy:
                     shares_to_buy = math.floor(shares_to_buy * 10000) / 10000.0
                     
                     orders["buy"] = shares_to_buy
-                    orders["exec_price"] = lower_band
+                    orders["exec_price"] = current_price
                     orders["is_maker"] = True
 
         elif self.active_regime == "Uptrend":
@@ -134,7 +134,7 @@ class VWAPMeanReversionStrategy:
                 if current_price < vwap:
                     logging.info(f"Uptrend Stop Loss: Price {current_price:.2f} < VWAP {vwap:.2f}. Selling to close long.")
                     orders["sell"] = current_holdings
-                    orders["exec_price"] = vwap
+                    orders["exec_price"] = current_price
                     orders["is_maker"] = True
             
             # Entry long: buy breakout if price crosses above upper_band (limit buy at upper_band)
@@ -150,7 +150,7 @@ class VWAPMeanReversionStrategy:
                     shares_to_buy = math.floor(shares_to_buy * 10000) / 10000.0
                     
                     orders["buy"] = shares_to_buy
-                    orders["exec_price"] = upper_band
+                    orders["exec_price"] = current_price
                     orders["is_maker"] = True
 
         elif self.active_regime == "Downtrend":
@@ -167,7 +167,7 @@ class VWAPMeanReversionStrategy:
                 if current_price > vwap:
                     logging.info(f"Downtrend Stop Loss: Price {current_price:.2f} > VWAP {vwap:.2f}. Buying to cover short.")
                     orders["buy"] = abs(current_holdings)
-                    orders["exec_price"] = vwap
+                    orders["exec_price"] = current_price
                     orders["is_maker"] = True
             
             # Entry short: sell breakdown if price crosses below lower_band (limit sell at lower_band)
@@ -183,7 +183,7 @@ class VWAPMeanReversionStrategy:
                     shares_to_sell = math.floor(shares_to_sell * 10000) / 10000.0
                     
                     orders["sell"] = shares_to_sell
-                    orders["exec_price"] = lower_band
+                    orders["exec_price"] = current_price
                     orders["is_maker"] = True
 
         return orders
